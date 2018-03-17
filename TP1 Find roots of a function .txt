@@ -1,0 +1,734 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "# Recherche de racine d'une fonction numérique"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Populating the interactive namespace from numpy and matplotlib\n"
+     ]
+    }
+   ],
+   "source": [
+    "%pylab inline"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "## Des fonctions pour tester\n",
+    "\n",
+    "On considère la fonction définie sur $\\mathbb{R}$ par \n",
+    "$$\n",
+    "f_1(x) = \\cos(x)-x+\\dfrac{1}{10}.\n",
+    "$$\n",
+    "\n",
+    "Commençons par écrire une fonction **f1(x)** qui retournera un scalaire **y** qui correspond à $f_1(x)$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "def f1(x):\n",
+    "    y = cos(x)-x+0.1\n",
+    "    return y"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Procéder comme ci-dessus pour les fonctions suivantes :\n",
+    "+ $f_2(x) = x^3+x-1000$,\n",
+    "+ $f_3(x) = x-e^{-x}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "def f2(x):\n",
+    "    y = x**3+x-1000\n",
+    "    return y\n",
+    "\n",
+    "def f3(x):\n",
+    "    y = x-exp(-x)\n",
+    "    return y"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "## Localisation par la méthode de dichotomie"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Ecrire une fonction **dicho(f,a,b,epsx,epsf)** qui applique l'algorithme de la dichotomie pour chercher la racine de **f** qui existe entre **a** et **b** tant que \n",
+    "$$\n",
+    "|f(c_n)| > epsf \\quad\\mbox{et}\\quad \\dfrac{|b_{n}-a_n|}{2}> epsx,\n",
+    "$$\n",
+    "où $c_n$ est le milieu de l'intervalle $[a_n,b_n]$ considéré à l'étape $n$.\n",
+    "\n",
+    "Cette fonction doit retourner le dernier milieu calculé, ainsi que le nombre d'itérations effectuées."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "def dicho(f,a,b,epsx,epsf):\n",
+    "    ai = a\n",
+    "    fai = f(ai)\n",
+    "    \n",
+    "    bi = b\n",
+    "    fbi = f(bi)   \n",
+    "    \n",
+    "    ci = (ai+bi)/2.0\n",
+    "    fci = f(ci)\n",
+    "    \n",
+    "    i = 0\n",
+    "    cdt1 = abs(fci) > epsf\n",
+    "    cdt2 = abs(bi-ai) > 2*epsx\n",
+    "    while cdt2 and cdt2:\n",
+    "        if fai*fci < 0:\n",
+    "            bi = ci\n",
+    "            fbi = fci\n",
+    "        else:\n",
+    "            ai = ci\n",
+    "            fai = fci\n",
+    "        \n",
+    "        ci = (ai+bi)/2.0\n",
+    "        fci = f(ci)\n",
+    "        \n",
+    "        cdt1 = abs(fci) > epsf\n",
+    "        cdt2 = abs(bi-ai) > 2*epsx\n",
+    "        \n",
+    "        i = i+1\n",
+    "    return ci,i"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Obtenir une approximation grossière de la racine $r_i$ de chacune des fonctions $f_i$ définies ci-dessus, en appliquant la méthode de dichotomie avec **epsx = epsf = 0.01**, en utilisant les intervalles initiaux suivants : \n",
+    "+ pour $f_1$, $[a,b] = \\left[0,\\dfrac{3 \\pi}{8}\\right]$ ; \n",
+    "+ pour $f_2$, $[a,b] = [9,10]$ ; \n",
+    "+ pour $f_3$, $[a,b] = [0,1]$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(0.8007379712763046, 6)\n",
+      "(9.9609375, 6)\n",
+      "(0.5703125, 6)\n"
+     ]
+    }
+   ],
+   "source": [
+    "D1 = dicho(f1,0,3*pi/8.0,0.01,0.01)\n",
+    "print(D1)\n",
+    "x01 = D1[0]\n",
+    "\n",
+    "D2 = dicho(f2,9,10,0.01,0.01)\n",
+    "print(D2)\n",
+    "x02 = D2[0]\n",
+    "\n",
+    "D3 = dicho(f3,0,1,0.01,0.01)\n",
+    "print(D3)\n",
+    "x03 = D3[0]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "## Approche rapide et précise de la racine par la méthode de Newton"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Ecrire une fonction **Newton(f,df,x0,epsx,epsf)** qui cherche à approcher précisément la racine de **f**, en appliquant l'algorithme de Newton depuis **x0** tant que \n",
+    "$$\n",
+    "|f(x_n)| > epsf \\quad\\mbox{et}\\quad |x_{n+1}-x_n|> epsx.\n",
+    "$$\n",
+    "\n",
+    "La fonction **df** permet d'évaluer la dérivée de la fonction **f**.\n",
+    "\n",
+    "Cette fonction doit retourner le dernier itéré calculé, ainsi que le nombre d'itérations effectuées."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "def Newton(f,df,x0,epsx,epsf):\n",
+    "    x = x0\n",
+    "    fx = f(x)\n",
+    "    dfx = df(x)\n",
+    "    cdt1 = abs(fx) > epsf\n",
+    "    cdt2 = True\n",
+    "    i = 0\n",
+    "    while cdt1 and cdt2:\n",
+    "        xprec = x\n",
+    "        x = x-fx/dfx\n",
+    "        fx = f(x)\n",
+    "        dfx = df(x)\n",
+    "        cdt1 = abs(fx) > epsf\n",
+    "        cdt2 = abs(x-xprec) > epsx\n",
+    "        i = i+1\n",
+    "    return x,i"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Obtenir une approximation précise de la racine $r_i$ de chacune des fonctions $f_i$ définies ci-dessus, en appliquant la méthode de Newton avec **epsx = epsf =**$10^{-10}$, en utilisant pour **x0** les solutions grossières obtenues par la méthode de dichotomie.\n",
+    "\n",
+    "Pour pouvoir appeler la fonction **Newton**, il faudra penser à écrire des fonctions **df1**, **df2**, et **df3** qui permettent d'évaluer les dérivées des fonctions $f_1$, $f_2$ et $f_3$ en un point $x$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.8007379712763046 (0.79808160139772755, 2)\n",
+      "9.9609375 (9.966666790534974, 3)\n",
+      "0.5703125 (0.56714329040918732, 2)\n"
+     ]
+    }
+   ],
+   "source": [
+    "def df1(x):\n",
+    "    yp = -sin(x)-1.0\n",
+    "    return yp\n",
+    "\n",
+    "def df2(x):\n",
+    "    yp = 3*x**2+1.0\n",
+    "    return yp\n",
+    "\n",
+    "def df3(x):\n",
+    "    yp = 1.0+exp(-x)\n",
+    "    return yp\n",
+    "\n",
+    "epsx = 1.0e-10\n",
+    "epsf = 1.0e-10\n",
+    "\n",
+    "N1 = Newton(f1,df1,x01,epsx,epsf)\n",
+    "print(x01,N1)\n",
+    "\n",
+    "N2 = Newton(f2,df2,x02,epsx,epsf)\n",
+    "print(x02,N2)\n",
+    "\n",
+    "N3 = Newton(f3,df3,x03,epsx,epsf)\n",
+    "print(x03,N3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "## Une application : le service de R. Federer\n",
+    "\n",
+    "R. Federer est au service depuis la position O de coordonnées $(0,0,0)$. Il lance la balle verticalement et la frappe avec sa raquette en un point D situé sur la verticale de O à la hauteur $H$.\n",
+    "La balle part alors de D avec une vitesse de module $v_0$ et un angle $\\alpha$ par rapport à l'horizontale.\n",
+    "On se place alors dans un repère orthonormé tel que les coordonnées de $\\vec{v}$ sont\n",
+    "$(v_0 \\cos(\\alpha),v_0 \\sin(\\alpha),0)$.\n",
+    "Supposons que la balle est de masse $m$ et considérons-la comme un point. \n",
+    "On étudie le mouvement de la balle dans le repère indiqué ci-dessus, en négligeant l'action de l'air.\n",
+    "\n",
+    "La balle est soumise uniquement à son poids $\\vec{P}$. \n",
+    "En effet, on ne tient compte ni de la poussée d’Archimède, ni de la force de\n",
+    "frottement de l’air sur la balle. \n",
+    "De plus, la raquette n’agit plus pendant le mouvement de la balle.\n",
+    "\n",
+    "En appliquant la seconde loi de Newton à la balle on a simplement $m \\vec{a} = m \\vec{g}$, c'est à dire $\\vec{a} = \\vec{g}$, ou encore, en projetant sur chacun des axes : \n",
+    "$$\n",
+    "\\begin{array}{rcl}\n",
+    "\\dfrac{dv_x}{dt} & = & 0,\n",
+    "\\\\\n",
+    "\\dfrac{dv_y}{dt} & = & -g,\n",
+    "\\\\\n",
+    "v_z & = & 0.\n",
+    "\\end{array}\n",
+    "$$\n",
+    "\n",
+    "En intégrant une première fois et en utilisant les conditions initiales de vitesse, on obtient\n",
+    "$$\n",
+    "\\begin{array}{rcl}\n",
+    "v_x & = & v_0 \\cos(\\alpha),\n",
+    "\\\\\n",
+    "v_y & = & -gt+v_0 \\sin(\\alpha),\n",
+    "\\\\\n",
+    "v_z & = & 0.\n",
+    "\\end{array}\n",
+    "$$\n",
+    "\n",
+    "Si on intègre une seconde fois et si on utilise les conditions initiales de position, on aboutit à\n",
+    "$$\n",
+    "\\begin{array}{rcl}\n",
+    "x & = & t v_0 \\cos(\\alpha),\n",
+    "\\\\\n",
+    "y & = & -g\\dfrac{t^2}{2}+tv_0 \\sin(\\alpha) + H,\n",
+    "\\\\\n",
+    "z & = & 0.\n",
+    "\\end{array}\n",
+    "$$\n",
+    "\n",
+    "On peut déduire $t$ de la première équation : $t = \\dfrac{x}{v_0 \\cos(\\alpha)}$.\n",
+    "En injectant le résultat dans la seconde équation, on obtient :\n",
+    "$$\n",
+    "y = -\\dfrac{g}{2} \\left(\\dfrac{x}{v_0 \\cos(\\alpha)}\\right)^2+\\left(\\dfrac{x}{v_0 \\cos(\\alpha)}\\right)v_0 \\sin(\\alpha) + H\n",
+    "$$\n",
+    "ou encore\n",
+    "$$\n",
+    "y = -\\dfrac{g}{2} \\left(\\dfrac{x}{v_0 \\cos(\\alpha)}\\right)^2+x \\tan(\\alpha) + H.\n",
+    "$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Les mesures faites sur le terrain sont les suivantes : \n",
+    "+ la raquette de R. Federer a frappé la balle avec $H = 2.20m$,\n",
+    "+ le module de la vitesse était $v_0 = 126 km.h^{-1}$,\n",
+    "+ la balle a touché le sol en $x = 18.7m$.\n",
+    "\n",
+    "On rappelle que $g \\simeq 9.81 m.s^{-2}$.\n",
+    "\n",
+    "On se demande quel angle $\\alpha$ faisait le vecteur vitesse avec l'horizontale ?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "### 1) Un tracé\n",
+    "\n",
+    "Réaliser un tracé de la fonction \n",
+    "$$\\alpha \\mapsto -\\dfrac{g}{2} \\left(\\dfrac{x}{v_0 \\cos(\\alpha)}\\right)^2+x \\tan(\\alpha) + H$$\n",
+    "pour $\\alpha$ entre $-\\dfrac{\\pi}{4}$ et $\\dfrac{\\pi}{4}$ afin de décider sur quel intervalle il serait pertinent de démarrer une dichotomie."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[<matplotlib.lines.Line2D at 0x7d1dfd0>]"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\ngg==\n",
+      "text/plain": [
+       "<matplotlib.figure.Figure at 0x7d1df98>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "H = 2.20\n",
+    "v0 = 126 *1000/3600.0 # vitesse en metres par seconde\n",
+    "x = 18.7\n",
+    "g = 9.81\n",
+    "\n",
+    "alpha = linspace(-pi/4,pi/4)\n",
+    "val = -g*(x/(v0*cos(alpha)))**2/2.0+x*tan(alpha)+H\n",
+    "plot(alpha,val)\n",
+    "plot([-pi/4,pi/4],[0,0],'k-')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "### 2) Localisation de la racine par dichotomie"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(-0.043750000000000004, 5)\n"
+     ]
+    }
+   ],
+   "source": [
+    "def f4(alpha):\n",
+    "    H = 2.20\n",
+    "    v0 = 126 *1000/3600.0 # vitesse en metres par seconde\n",
+    "    x = 18.7\n",
+    "    g = 9.81\n",
+    "    y = -g*(x/(v0*cos(alpha)))**2/2.0+x*tan(alpha)+H\n",
+    "    return y\n",
+    "\n",
+    "def df4(alpha):\n",
+    "    H = 2.20\n",
+    "    v0 = 126 *1000/3600.0 # vitesse en metres par seconde\n",
+    "    x = 18.7\n",
+    "    g = 9.81\n",
+    "    yp = -g*(x/(v0*cos(alpha)))*(x*v0*sin(alpha)/((v0*cos(alpha))**2))+x/((cos(alpha))**2)\n",
+    "    return yp\n",
+    "\n",
+    "D4 = dicho(f4,-0.2,0.2,0.01,0.01)\n",
+    "print(D4)\n",
+    "x04 = D4[0]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "### 3) Approximation précise de l'angle par la méthode de Newton"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-0.043750000000000004 (-0.042608824379255922, 2)\n",
+      "l'angle (en degrés) =  -2.44130580695\n"
+     ]
+    }
+   ],
+   "source": [
+    "eps = 1.0e-10\n",
+    "N4 = Newton(f4,df4,x04,eps,eps)\n",
+    "print(x04,N4)\n",
+    "\n",
+    "print(\"l'angle (en degrés) = \",N4[0]*180/pi)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "## Recherche de toutes les racines d'une fonction\n",
+    "\n",
+    "On cherche ici à déterminer toutes les solutions de l'équation $f(x) = 0$ sur un intervalle $[c,d]$."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Ecrire une fonction **localise(f,c,d,mu)** qui localise, par discrétisation, toutes les racines de **f** à **mu** près entre **c** et **d**, en évaluant **f** aux bornes de chaque sous-intervalle de longueur **mu**.\n",
+    "\n",
+    "On admettra que si **f** est de même signe aux extrémités d'un sous-intervalle de longueur **mu**, alors **f** ne s'annule pas dans ce sous-intervalle.\n",
+    "\n",
+    "Cette fonction retournera deux tableaux **deb** et **fin**. Le premier contiendra les bornes gauches des sous-intervalles contenant une racine de **f**. Le second contiendra les bornes droites correspondantes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "def localise(f,c,d,mu):\n",
+    "    a = c\n",
+    "    b = c+mu\n",
+    "    gauche = []\n",
+    "    droite = []\n",
+    "    while b<d:\n",
+    "        fa = f(a)\n",
+    "        fb = f(b)\n",
+    "        if fa*fb < 0:\n",
+    "            gauche.append(a)\n",
+    "            droite.append(b)\n",
+    "        a = b\n",
+    "        b = a+mu\n",
+    "    b = d\n",
+    "    fa = f(a)\n",
+    "    fb = f(b)\n",
+    "    if fa*fb < 0:\n",
+    "        gauche.append(a)\n",
+    "        droite.append(b)\n",
+    "    return gauche,droite"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Ecrire une fonction **toutes_racines(f,df,c,d,mu,epsx,epsf)** qui recherche toutes les racines de **f** entre **c** et **d** en appliquant la démarche suivante :\n",
+    "+ appel de la fonction **localise** pour obtenir les sous-intervalles de longueur **mu** contenant une racine de $f$ ; \n",
+    "+ puis utilisation d'une méthode de Newton sur chacun des sous-intervalles ainsi obtenus, par exemple en démarrant du milieu du sous-intervalle.\n",
+    "\n",
+    "Cette fonction retournera la liste des racines approchées de **f**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "def toutes_racines(f,df,c,d,mu,epsx,epsf):\n",
+    "    racines = []\n",
+    "    gauche,droite = localise(f,c,d,mu)\n",
+    "    nb_rac = len(gauche)\n",
+    "    print(\"Nb de racines = \",nb_rac)\n",
+    "    for i in range(nb_rac):\n",
+    "        x0 = (gauche[i]+droite[i])/2.0\n",
+    "        rac,iter = Newton(f,df,x0,epsx,epsf)\n",
+    "        racines.append(rac)\n",
+    "    return racines"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Tester la fonction **toutes_racines** avec la fonction $f(x) = x^3-4x+1$ sur $[-10,10]$. \n",
+    "\n",
+    "On pourra prendre **mu = 0.5** et **epsx = epsf = **$10^{-12}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Nb de racines =  3\n",
+      "racines =  [-2.114907541476756, 0.2541016883650524, 1.8608058531117035]\n",
+      "[-1.7763568394002505e-15, 0.0, 8.881784197001252e-16]\n"
+     ]
+    }
+   ],
+   "source": [
+    "def f5(x):\n",
+    "    f = x**3-4*x+1\n",
+    "    return f\n",
+    "\n",
+    "def df5(x):\n",
+    "    fp = 3*x**2-4\n",
+    "    return fp\n",
+    "\n",
+    "f = f5\n",
+    "df = df5\n",
+    "c = -10\n",
+    "d = 10\n",
+    "eps = 1.0e-12\n",
+    "mu = 0.5\n",
+    "racines = toutes_racines(f,df,c,d,mu,eps,eps)\n",
+    "print (\"racines = \",racines)\n",
+    "print ([f5(rac) for rac in racines])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.5.2"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
